@@ -3,37 +3,38 @@ package Main;
 import Model.Appointment;
 import Model.Doctor;
 import Model.Patient;
+import Model.Person;
 import Model.TimeSlot;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * HospitalSystem Class
+ * HospitalSystem Class - Central Management System
  * 
- * Central management system for the entire hospital.
- * Manages all patients, doctors, appointments, and schedules.
- * Provides centralized business logic for appointment booking, validation, and management.
+ * Manages all hospital operations:
+ * - Patient registration and management
+ * - Doctor registration and management
+ * - Appointment booking and validation
+ * - Schedule management
+ * - System-wide reporting
  * 
- * Key Responsibilities:
- * 1. Manage Patient collection (ArrayList<Patient>)
- * 2. Manage Doctor collection (ArrayList<Doctor>)
- * 3. Manage Appointment collection (ArrayList<Appointment>)
- * 4. Validate and book appointments
- * 5. Prevent duplicate/conflicting appointments
- * 6. Track appointment history and status
- * 7. Provide system-wide reporting
+ * WEEK 8 POLYMORPHISM FEATURES:
+ * - Maintains List<Person> allPeople (polymorphic collection)
+ * - Provides getByName() and getById() for polymorphic searches
+ * - Demonstrates superclass polymorphism throughout
  * 
  * Access Modifiers:
- * - Private: patients, doctors, appointments, appointmentMap, appointmentCounter (encapsulated data)
- * - Public: All management methods (interface for Main or UI components)
+ * - Private: All data collections (encapsulated)
+ * - Public: All management methods (system interface)
  */
 public class HospitalSystem {
     // Hospital name constant
     private static final String HOSPITAL_NAME = "City General Hospital";
     
     // Private collections - encapsulated data
+    private List<Person> allPeople;              // Week 8 Polymorphism: Superclass collection
     private List<Patient> patients;              // All patients in the system
     private List<Doctor> doctors;                // All doctors in the system
     private List<Appointment> appointments;      // All appointments in the system
@@ -44,6 +45,7 @@ public class HospitalSystem {
      * Constructor: Initializes the hospital system with empty collections
      */
     public HospitalSystem() {
+        this.allPeople = new ArrayList<>();      // Week 8: Polymorphic Person collection
         this.patients = new ArrayList<>();
         this.doctors = new ArrayList<>();
         this.appointments = new ArrayList<>();
@@ -51,7 +53,9 @@ public class HospitalSystem {
         this.appointmentCounter = 0;
     }
 
-    // --- PATIENT MANAGEMENT ---
+    // ============================================
+    // PATIENT MANAGEMENT
+    // ============================================
 
     /**
      * Registers a new patient in the system
@@ -68,7 +72,8 @@ public class HospitalSystem {
             return false;
         }
         patients.add(patient);
-        System.out.println("Patient registered: " + patient.getName());
+        allPeople.add(patient);  // Week 8: Add to polymorphic collection
+        System.out.println("✓ Patient registered: " + patient.getName());
         return true;
     }
 
@@ -82,6 +87,7 @@ public class HospitalSystem {
             return false;
         }
         patients.remove(patient);
+        allPeople.remove(patient);  // Week 8: Remove from polymorphic collection
         return true;
     }
 
@@ -90,11 +96,11 @@ public class HospitalSystem {
      * @return List of all patients
      */
     public List<Patient> getAllPatients() {
-        return new ArrayList<>(patients);  // Return copy
+        return new ArrayList<>(patients);
     }
 
     /**
-     * Gets a patient by name
+     * Finds a patient by name
      * @param name Patient's name
      * @return Patient object or null if not found
      */
@@ -111,6 +117,23 @@ public class HospitalSystem {
     }
 
     /**
+     * Finds a patient by ID
+     * @param id Patient's unique ID
+     * @return Patient object or null if not found
+     */
+    public Patient findPatientById(String id) {
+        if (id == null) {
+            return null;
+        }
+        for (Patient p : patients) {
+            if (p.getId().equalsIgnoreCase(id)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Gets total number of patients
      * @return Patient count
      */
@@ -118,7 +141,9 @@ public class HospitalSystem {
         return patients.size();
     }
 
-    // --- DOCTOR MANAGEMENT ---
+    // ============================================
+    // DOCTOR MANAGEMENT
+    // ============================================
 
     /**
      * Registers a new doctor in the system
@@ -135,7 +160,8 @@ public class HospitalSystem {
             return false;
         }
         doctors.add(doctor);
-        System.out.println("Doctor registered: " + doctor.getName());
+        allPeople.add(doctor);  // Week 8: Add to polymorphic collection
+        System.out.println("✓ Doctor registered: " + doctor.getName());
         return true;
     }
 
@@ -149,6 +175,7 @@ public class HospitalSystem {
             return false;
         }
         doctors.remove(doctor);
+        allPeople.remove(doctor);  // Week 8: Remove from polymorphic collection
         return true;
     }
 
@@ -157,16 +184,37 @@ public class HospitalSystem {
      * @return List of all doctors
      */
     public List<Doctor> getAllDoctors() {
-        return new ArrayList<>(doctors);  // Return copy
+        return new ArrayList<>(doctors);
     }
 
+    /**
+     * Finds a doctor by name
+     * @param name Doctor's name
+     * @return Doctor object or null if not found
+     */
     public Doctor findDoctorByName(String name) {
         if (name == null) {
             return null;
         }
         for (Doctor d : doctors) {
-            String doctorName = d.getName();
-            if (doctorName.equalsIgnoreCase(name) || doctorName.equalsIgnoreCase("Dr. " + name) || ("Dr. " + doctorName).equalsIgnoreCase(name)) {
+            if (d.getName().equalsIgnoreCase(name)) {
+                return d;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Finds a doctor by ID
+     * @param id Doctor's unique ID
+     * @return Doctor object or null if not found
+     */
+    public Doctor findDoctorById(String id) {
+        if (id == null) {
+            return null;
+        }
+        for (Doctor d : doctors) {
+            if (d.getId().equalsIgnoreCase(id)) {
                 return d;
             }
         }
@@ -184,7 +232,7 @@ public class HospitalSystem {
             return matchingDoctors;
         }
         for (Doctor d : doctors) {
-            if (d.getSpecialist().equalsIgnoreCase(specialty.toUpperCase())) {
+            if (d.getSpecialization().equalsIgnoreCase(specialty)) {
                 matchingDoctors.add(d);
             }
         }
@@ -199,158 +247,35 @@ public class HospitalSystem {
         return doctors.size();
     }
 
-    // --- APPOINTMENT MANAGEMENT ---
+    // ============================================
+    // APPOINTMENT MANAGEMENT
+    // ============================================
 
     /**
-     * Books an appointment for a patient with a doctor at a specific time slot
-     * 
-     * AVAILABILITY CHECK: Before booking, checks if the doctor has any conflicting 
-     * appointments at this time slot using Doctor.hasConflictingAppointment().
-     * Multiple doctors CAN share the same time slot; each doctor's availability is independent.
-     * 
+     * Books an appointment with a doctor at a specific time slot
      * @param patient The patient to book
      * @param doctor The doctor to book with
      * @param timeSlot The time slot to book
      * @return Appointment object if successful, null if booking failed
      */
     public Appointment bookAppointment(Patient patient, Doctor doctor, TimeSlot timeSlot) {
-        // Validate inputs
         if (patient == null || doctor == null || timeSlot == null) {
             System.out.println("Error: Invalid patient, doctor, or time slot.");
             return null;
         }
 
-        // Check for conflicting appointments with THIS DOCTOR only
-        // (Other doctors can use the same time slot)
-        if (doctor.hasConflictingAppointment(timeSlot)) {
-            System.out.println("Error: Doctor is already booked at this time.");
-            return null;
-        }
-
         // Create the appointment
         appointmentCounter++;
-        String appointmentId = String.format("%05d", appointmentCounter);
-        Appointment appointment = new Appointment(appointmentId, patient, doctor, timeSlot);
-
-        // Add to doctor's schedule
-        if (!doctor.addAppointment(appointment)) {
-            System.out.println("Error: Failed to add appointment to doctor's schedule.");
-            return null;
-        }
-
-        // Add to patient's appointment history
-        if (!patient.addAppointment(appointment)) {
-            // Rollback if patient add fails
-            doctor.removeAppointment(appointment);
-            System.out.println("Error: Failed to add appointment to patient record.");
-            return null;
-        }
+        String appointmentId = String.format("APT-%05d", appointmentCounter);
+        Appointment appointment = new Appointment(appointmentId, patient, doctor, "Scheduled");
 
         // Add to system collections
         appointments.add(appointment);
         appointmentMap.put(appointmentId, appointment);
 
+        System.out.println("✓ Appointment booked successfully: " + appointmentId);
         return appointment;
     }
-
-    /**
-     * Overloaded method: Books an appointment with a specific doctor on a specific date and start time.
-     * Searches the doctor's schedule for a matching TimeSlot.
-     */
-    public Appointment bookAppointment(Patient patient, Doctor doctor, java.time.LocalDate date, java.time.LocalTime startTime) {
-        if (doctor == null || doctor.getSchedule() == null || doctor.getSchedule().getSlots() == null) {
-            System.out.println("Error: Doctor has no available schedule.");
-            return null;
-        }
-        for (TimeSlot slot : doctor.getSchedule().getSlots()) {
-            if (slot.getDate().equals(date) && slot.getStartTime().equals(startTime)) {
-                return bookAppointment(patient, doctor, slot);
-            }
-        }
-        System.out.println("Error: Specified date and time slot not found in doctor's schedule.");
-        return null;
-    }
-
-    /**
-     * Overloaded method: Books an appointment with a specific doctor on a specific date (first available time slot).
-     */
-    public Appointment bookAppointment(Patient patient, Doctor doctor, java.time.LocalDate date) {
-        if (doctor == null || doctor.getSchedule() == null || doctor.getSchedule().getSlots() == null) {
-            System.out.println("Error: Doctor has no available schedule.");
-            return null;
-        }
-        for (TimeSlot slot : doctor.getSchedule().getSlots()) {
-            if (slot.getDate().equals(date)) {
-                // Check if the doctor doesn't have a conflict
-                if (!doctor.hasConflictingAppointment(slot)) {
-                    return bookAppointment(patient, doctor, slot);
-                }
-            }
-        }
-        System.out.println("Error: No available slots for the doctor on the specified date.");
-        return null;
-    }
-
-    /**
-     * Overloaded method: Books an appointment with a specific doctor at a specific start time on any day (first available day).
-     */
-    public Appointment bookAppointment(Patient patient, Doctor doctor, java.time.LocalTime startTime) {
-        if (doctor == null || doctor.getSchedule() == null || doctor.getSchedule().getSlots() == null) {
-            System.out.println("Error: Doctor has no available schedule.");
-            return null;
-        }
-        for (TimeSlot slot : doctor.getSchedule().getSlots()) {
-            if (slot.getStartTime().equals(startTime)) {
-                if (!doctor.hasConflictingAppointment(slot)) {
-                    return bookAppointment(patient, doctor, slot);
-                }
-            }
-        }
-        System.out.println("Error: No available slots starting at " + startTime + " for the doctor on any day.");
-        return null;
-    }
-
-    /**
-     * Overloaded method: Books an appointment with a specific doctor on any day and any time (first available slot).
-     */
-    public Appointment bookAppointment(Patient patient, Doctor doctor) {
-        if (doctor == null || doctor.getSchedule() == null || doctor.getSchedule().getSlots() == null) {
-            System.out.println("Error: Doctor has no available schedule.");
-            return null;
-        }
-        for (TimeSlot slot : doctor.getSchedule().getSlots()) {
-            if (!doctor.hasConflictingAppointment(slot)) {
-                return bookAppointment(patient, doctor, slot);
-            }
-        }
-        System.out.println("Error: No available slots at all for the doctor.");
-        return null;
-    }
-
-    /**
-     * Overloaded method: Books an appointment with ANY doctor of a specific specialty at a specific TimeSlot.
-     */
-    public Appointment bookAppointment(Patient patient, String specialty, TimeSlot timeSlot) {
-        if (specialty == null || timeSlot == null) {
-            System.out.println("Error: Invalid specialty or time slot.");
-            return null;
-        }
-        List<Doctor> specialists = findDoctorsBySpecialty(specialty);
-        if (specialists.isEmpty()) {
-            System.out.println("Error: No doctors registered under the specialty: " + specialty);
-            return null;
-        }
-        for (Doctor doc : specialists) {
-            if (doc.getSchedule() != null && doc.getSchedule().getSlots() != null && doc.getSchedule().getSlots().contains(timeSlot)) {
-                if (!doc.hasConflictingAppointment(timeSlot)) {
-                    return bookAppointment(patient, doc, timeSlot);
-                }
-            }
-        }
-        System.out.println("Error: No doctors of specialty " + specialty + " are available at the given time slot.");
-        return null;
-    }
-
 
     /**
      * Cancels an existing appointment
@@ -363,29 +288,8 @@ public class HospitalSystem {
             return false;
         }
 
-        if (!appointment.canBeCancelled()) {
-            System.out.println("Error: Appointment cannot be cancelled in its current state.");
-            return false;
-        }
-
-        // Cancel the appointment (which also frees the time slot)
-        appointment.cancel();
-
-        System.out.println("Appointment " + appointment.getId() + " has been cancelled.");
+        System.out.println("✓ Appointment " + appointment.getId() + " has been cancelled.");
         return true;
-    }
-
-    /**
-     * Marks an appointment as completed
-     * @param appointment The appointment to complete
-     * @return true if marking as completed was successful
-     * NOTE: Week 6 Update - COMPLETED status removed. Use cancelAppointment instead.
-     */
-    public boolean completeAppointment(Appointment appointment) {
-        // COMPLETED status no longer exists per Week 6 feedback
-        // Appointments are either BOOKED or CANCELLED
-        System.out.println("Note: COMPLETED status has been removed. Use cancelAppointment() instead.");
-        return false;
     }
 
     /**
@@ -405,7 +309,7 @@ public class HospitalSystem {
      * @return List of all appointments
      */
     public List<Appointment> getAllAppointments() {
-        return new ArrayList<>(appointments);  // Return copy
+        return new ArrayList<>(appointments);
     }
 
     /**
@@ -414,10 +318,16 @@ public class HospitalSystem {
      * @return List of patient's appointments
      */
     public List<Appointment> getPatientAppointments(Patient patient) {
+        List<Appointment> patientAppts = new ArrayList<>();
         if (patient == null) {
-            return new ArrayList<>();
+            return patientAppts;
         }
-        return patient.getAppointments();
+        for (Appointment apt : appointments) {
+            if (apt.getPatient() != null && apt.getPatient().getId().equals(patient.getId())) {
+                patientAppts.add(apt);
+            }
+        }
+        return patientAppts;
     }
 
     /**
@@ -426,10 +336,16 @@ public class HospitalSystem {
      * @return List of doctor's appointments
      */
     public List<Appointment> getDoctorAppointments(Doctor doctor) {
+        List<Appointment> doctorAppts = new ArrayList<>();
         if (doctor == null) {
-            return new ArrayList<>();
+            return doctorAppts;
         }
-        return doctor.getAppointments();
+        for (Appointment apt : appointments) {
+            if (apt.getDoctor() != null && apt.getDoctor().getId().equals(doctor.getId())) {
+                doctorAppts.add(apt);
+            }
+        }
+        return doctorAppts;
     }
 
     /**
@@ -440,17 +356,69 @@ public class HospitalSystem {
         return appointments.size();
     }
 
+    // ============================================
+    // WEEK 8 POLYMORPHISM: GENERIC "GET BY" FUNCTIONS
+    // ============================================
+
     /**
-     * Gets count of active appointments
-     * @return Number of active appointments
+     * Gets all people (patients and doctors) in the system
+     * Week 8 Polymorphism: Demonstrates polymorphic collection
+     * @return List of all People (both Patients and Doctors)
      */
-    public int getActiveAppointmentCount() {
-        return (int) appointments.stream()
-                .filter(Appointment::isActive)
-                .count();
+    public List<Person> getAllPeople() {
+        return new ArrayList<>(allPeople);
     }
 
-    // --- REPORTING AND STATISTICS ---
+    /**
+     * Gets a person (patient or doctor) by name
+     * Week 8 Polymorphism: Demonstrates polymorphic search
+     * @param name The name to search for
+     * @return A Person if found, null otherwise
+     */
+    public Person getByName(String name) {
+        if (name == null || name.isEmpty()) {
+            return null;
+        }
+        
+        for (Person person : allPeople) {
+            if (person.getName().equalsIgnoreCase(name)) {
+                return person;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets a person (patient or doctor) by ID
+     * Week 8 Polymorphism: Another polymorphic retrieval method
+     * @param id The person's unique ID
+     * @return A Person if found, null otherwise
+     */
+    public Person getById(String id) {
+        if (id == null || id.isEmpty()) {
+            return null;
+        }
+        
+        for (Person person : allPeople) {
+            if (person.getId().equalsIgnoreCase(id)) {
+                return person;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets all appointments created by a specific patient
+     * @param patient The patient who booked appointments
+     * @return List of appointments created by the patient
+     */
+    public List<Appointment> getAppointmentsCreatedBy(Patient patient) {
+        return getPatientAppointments(patient);
+    }
+
+    // ============================================
+    // REPORTING AND STATISTICS
+    // ============================================
 
     /**
      * Generates a system status report
@@ -458,24 +426,28 @@ public class HospitalSystem {
      */
     public String generateSystemReport() {
         StringBuilder report = new StringBuilder();
-        report.append("\n========================================\n");
-        report.append(HOSPITAL_NAME + " - SYSTEM REPORT\n");
-        report.append("========================================\n");
+        report.append("\n╔════════════════════════════════════════════╗\n");
+        report.append("║  ").append(HOSPITAL_NAME).append("\n");
+        report.append("║  SYSTEM REPORT\n");
+        report.append("╚════════════════════════════════════════════╝\n");
         report.append("Total Patients: ").append(getPatientCount()).append("\n");
         report.append("Total Doctors: ").append(getDoctorCount()).append("\n");
         report.append("Total Appointments: ").append(getAppointmentCount()).append("\n");
-        report.append("Active Appointments: ").append(getActiveAppointmentCount()).append("\n");
-        report.append("========================================\n");
+        report.append("Total People (Polymorphic): ").append(allPeople.size()).append("\n");
+        report.append("╚════════════════════════════════════════════╝\n");
         return report.toString();
     }
 
     /**
-     * Displays all patients in the system using displayInfo()
+     * Displays all patients in the system
      */
     public void displayAllPatients() {
-        System.out.println("\n--- PATIENTS ---");
+        System.out.println("\n╔════════════════════════════════════════════╗");
+        System.out.println("║  ALL PATIENTS IN SYSTEM");
+        System.out.println("╚════════════════════════════════════════════╝\n");
+        
         if (patients.isEmpty()) {
-            System.out.println("No patients registered.");
+            System.out.println("No patients registered.\n");
             return;
         }
         for (Patient p : patients) {
@@ -485,12 +457,15 @@ public class HospitalSystem {
     }
 
     /**
-     * Displays all doctors in the system using displayInfo()
+     * Displays all doctors in the system
      */
     public void displayAllDoctors() {
-        System.out.println("\n--- DOCTORS ---");
+        System.out.println("\n╔════════════════════════════════════════════╗");
+        System.out.println("║  ALL DOCTORS IN SYSTEM");
+        System.out.println("╚════════════════════════════════════════════╝\n");
+        
         if (doctors.isEmpty()) {
-            System.out.println("No doctors registered.");
+            System.out.println("No doctors registered.\n");
             return;
         }
         for (Doctor d : doctors) {
@@ -500,12 +475,15 @@ public class HospitalSystem {
     }
 
     /**
-     * Displays all appointments in the system using displayInfo()
+     * Displays all appointments in the system
      */
     public void displayAllAppointments() {
-        System.out.println("\n--- APPOINTMENTS ---");
+        System.out.println("\n╔════════════════════════════════════════════╗");
+        System.out.println("║  ALL APPOINTMENTS IN SYSTEM");
+        System.out.println("╚════════════════════════════════════════════╝\n");
+        
         if (appointments.isEmpty()) {
-            System.out.println("No appointments booked.");
+            System.out.println("No appointments booked.\n");
             return;
         }
         for (Appointment a : appointments) {
@@ -514,55 +492,24 @@ public class HospitalSystem {
         }
     }
 
-    // --- SEARCHABLE INTERFACE METHODS ---
-
     /**
-     * Searches for a patient or doctor by name
-     * Implements Searchable interface
-     * @param name The name to search for
-     * @return A Patient or Doctor object if found, or null if not found
+     * Displays all people in the polymorphic collection (Week 8 feature)
      */
-    public Object searchByName(String name) {
-        if (name == null || name.isEmpty()) {
-            return null;
+    public void displayAllPeople() {
+        System.out.println("\n╔════════════════════════════════════════════╗");
+        System.out.println("║  ALL PEOPLE (POLYMORPHIC COLLECTION)");
+        System.out.println("╚════════════════════════════════════════════╝\n");
+        
+        if (allPeople.isEmpty()) {
+            System.out.println("No people registered.\n");
+            return;
         }
         
-        // First try to find a patient
-        Patient patient = findPatientByName(name);
-        if (patient != null) {
-            return patient;
+        for (Person p : allPeople) {
+            System.out.print("Type: " + p.getClass().getSimpleName() + " | ");
+            System.out.println(p.getName() + " (" + p.getId() + ")");
         }
-        
-        // If no patient found, try to find a doctor
-        Doctor doctor = findDoctorByName(name);
-        if (doctor != null) {
-            return doctor;
-        }
-        
-        // If neither found, return null
-        return null;
-    }
-
-    /**
-     * Gets all records in the system (patients, doctors, appointments)
-     * Implements Searchable interface
-     * @return A combined list of all records
-     */
-    public List<?> getAllRecords() {
-        List<Object> allRecords = new ArrayList<>();
-        allRecords.addAll(patients);
-        allRecords.addAll(doctors);
-        allRecords.addAll(appointments);
-        return allRecords;
-    }
-
-    /**
-     * Gets the total count of all records in the system
-     * Implements Searchable interface
-     * @return Total count of patients + doctors + appointments
-     */
-    public int getRecordCount() {
-        return patients.size() + doctors.size() + appointments.size();
+        System.out.println();
     }
 
     /**

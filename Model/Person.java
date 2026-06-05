@@ -1,6 +1,9 @@
 
 package Model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Person Class - Superclass for Patient and Doctor
  * 
@@ -120,6 +123,16 @@ public class Person implements Displayable {
     }
 
     /**
+     * Gets the entity that created this person record
+     * Overridden by subclasses to provide specific creation source
+     * Week 8 Polymorphism: Each subclass provides its own implementation
+     * @return String describing who created this person record
+     */
+    public String getCreatedBy() {
+        return "Hospital System";
+    }
+
+    /**
      * Displays common person information.
      * Overridden by subclasses to print additional attributes.
      */
@@ -128,5 +141,74 @@ public class Person implements Displayable {
         System.out.println("ID: " + id);
         System.out.println("Name: " + name);
         System.out.println("Phone: " + getPhone());
+    }
+
+    // --- WEEK 8 POLYMORPHISM: STATIC "GET BY" UTILITY FUNCTIONS ---
+
+    /**
+     * Static utility method: Gets a person from a collection by name
+     * Week 8 Polymorphism: Demonstrates static polymorphic search
+     * - Works with ANY Person collection (Patients, Doctors, or mixed)
+     * - Returns Person type (superclass), actual type determined at runtime
+     * @param people Collection of people to search
+     * @param name The name to search for
+     * @return A Person if found, null otherwise
+     */
+    public static Person getByName(List<Person> people, String name) {
+        if (people == null || name == null || name.isEmpty()) {
+            return null;
+        }
+        
+        for (Person person : people) {
+            if (person.getName().equalsIgnoreCase(name)) {
+                return person;  // Return as Person (polymorphic type)
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Static utility method: Gets a person from a collection by ID
+     * Week 8 Polymorphism: Another polymorphic search function
+     * - Searches through polymorphic Person collection
+     * - Returns Person (declared type), but actual object could be Patient or Doctor
+     * @param people Collection of people to search
+     * @param id The ID to search for
+     * @return A Person if found, null otherwise
+     */
+    public static Person getById(List<Person> people, String id) {
+        if (people == null || id == null || id.isEmpty()) {
+            return null;
+        }
+        
+        for (Person person : people) {
+            if (person.getId().equalsIgnoreCase(id)) {
+                return person;  // Return as Person (polymorphic type)
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Static utility method: Filters people by their actual type
+     * Week 8 Polymorphism: Demonstrates runtime type checking
+     * - Takes a polymorphic collection of People
+     * - Returns only people of a specific type (Patient or Doctor)
+     * @param people Collection of people to filter
+     * @param type The class type to filter by (Patient.class or Doctor.class)
+     * @return List of people matching the specified type
+     */
+    public static List<Person> getByType(List<Person> people, Class<?> type) {
+        List<Person> result = new ArrayList<>();
+        if (people == null) {
+            return result;
+        }
+        
+        for (Person person : people) {
+            if (type.isInstance(person)) {
+                result.add(person);
+            }
+        }
+        return result;
     }
 }
