@@ -1,6 +1,7 @@
 package Main;
 
 import Model.Appointment;
+import Model.AppointmentStatus;
 import Model.Doctor;
 import Model.Patient;
 import Model.Person;
@@ -232,7 +233,7 @@ public class HospitalSystem {
             return matchingDoctors;
         }
         for (Doctor d : doctors) {
-            if (d.getSpecialization().equalsIgnoreCase(specialty)) {
+            if (d.getSpecialist().equalsIgnoreCase(specialty)) {
                 matchingDoctors.add(d);
             }
         }
@@ -267,7 +268,12 @@ public class HospitalSystem {
         // Create the appointment
         appointmentCounter++;
         String appointmentId = String.format("APT-%05d", appointmentCounter);
-        Appointment appointment = new Appointment(appointmentId, patient, doctor, "Scheduled");
+        Appointment appointment = new Appointment(appointmentId, patient, doctor, timeSlot, AppointmentStatus.BOOKED);
+
+        if (!doctor.addAppointment(appointment)) {
+            return null;
+        }
+        patient.addAppointment(appointment);
 
         // Add to system collections
         appointments.add(appointment);
